@@ -1,3 +1,3 @@
-cat ./"Coffee Machine"/task/main.js > ./main.js
+cat ./"Carnival Gift Shop"/task/main.js > ./main.js
 git add .
 
