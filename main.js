@@ -1,7 +1,7 @@
 const input = require('sync-input');
 //visitor
 let visitor = {
-    tickets: 100,
+    tickets: 0,
     checkTickets(){
         console.log('Total tickets:', this.tickets);
     },
@@ -10,6 +10,7 @@ let visitor = {
         let item = carnival.catalogue[--userInput];
         console.log('Here you go, one', item.name + '!');
         this.tickets -= item.price;
+        carnival.removeItem(item.id);
         this.checkTickets();
     },
     addTickets(){
@@ -23,6 +24,7 @@ class Item {
         this.id = id;
         this.name = name;
         this.price = price;
+        this.show = true;
     }
 }
 
@@ -39,12 +41,15 @@ let carnival = {
     },
     showCatalogue(){
         console.log("Here's the list of gifts:\n")
-        this.catalogue.forEach((item) => console.log(`${item.id}- ${item.name}, Cost: ${item.price} tickets`));
+        this.catalogue.forEach((item) => item.show ? (console.log(`${item.id}- ${item.name}, Cost: ${item.price} tickets`)) : null);
         console.log();
     },
     addItem(id=0, name, price){
         let item = new Item(id === 0 ? 1 : id, name, price);
         this.catalogue.push(item);
+    },
+    removeItem(id){
+        this.catalogue[--id].show = false;
     }
 
 }
@@ -62,29 +67,36 @@ carnival.welcome();
 carnival.greeting();
 carnival.showCatalogue();
 
-const actions = ['Buy a gift', 'Add tickets', 'Check tickets', 'Show gifts'];
+const actions = ['Buy a gift', 'Add tickets', 'Check tickets', 'Show gifts', 'Exit the shop'];
 
 function showActions(actions){
     let data = '';
     actions.forEach((item, index) => data += String(index + 1) + '-' + item + (index === actions.length - 1 ? '' : ' '));
     return data;
 }
-let mainInput = input(`What do you want to do?\n${showActions(actions)}`);
-switch (mainInput){
-    case '1':
-        visitor.buyGift();
-        break;
-    case '2':
-        visitor.addTickets();
-        break;
-    case '3':
-        visitor.checkTickets();
-        break;
-    case '4':
-        carnival.showCatalogue();
-        break;
-    default:
-        console.log('Yet unknown command');
-        break;
+let isActive = true;
+
+while (isActive) {
+    let userInput = input(`What do you want to do?\n${showActions(actions)}\n`);
+    switch (userInput) {
+        case '1':
+            visitor.buyGift();
+            break;
+        case '2':
+            visitor.addTickets();
+            break;
+        case '3':
+            visitor.checkTickets();
+            break;
+        case '4':
+            carnival.showCatalogue();
+            break;
+        case '5':
+            isActive = false;
+            break;
+        default:
+            console.log('Yet unknown command');
+            break;
+    }
 }
 carnival.bye();
