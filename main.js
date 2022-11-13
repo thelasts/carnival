@@ -1,4 +1,11 @@
 const input = require('sync-input');
+class Item {
+    constructor(id, name, price){
+        this.id = id;
+        this.name = name;
+        this.price = price;
+    }
+}
 //visitor
 let visitor = {
     tickets: 0,
@@ -6,25 +13,42 @@ let visitor = {
         console.log('Total tickets:', this.tickets);
     },
     buyGift() {
-        let userInput = input('Enter the number of the gift you want to get:');
-        let item = carnival.catalogue[--userInput];
-        console.log('Here you go, one', item.name + '!');
-        this.tickets -= item.price;
-        carnival.removeItem(item.id);
+        // no gifts to buy
+        if (carnival.catalogue.length === 0){
+            console.log('Wow! There are no gifts to buy.\n');
+            return;
+        }
+        let userInput = +input('Enter the number of the gift you want to get:');
+        //invalid item
+        if (isNaN(userInput)){
+            console.log('Please enter a valid number!\n');
+            return;
+        }
+        let item = carnival.catalogue.find((item) => item.id === userInput);
+        //no gift found
+        if (item === undefined){
+            console.log('There is no gift with that number!\n');
+            return;
+        }
+        //not enough money
+        if (this.tickets < item.price){
+            console.log("You don't have enough tickets to buy this gift.\n");
+        } else {
+            this.tickets -= item.price;
+            console.log('Here you go, one', item.name + '!');
+            carnival.removeItem(item.id);
+        }
         this.checkTickets();
     },
     addTickets(){
     let userInput = input('Enter the ticket amount:');
+    //input handle
+    if (isNaN(userInput) || userInput < 0 || userInput > 1000){
+        console.log('Please enter a valid number between 0 and 1000.');
+        return;
+    }
     this.tickets += +userInput;
     this.checkTickets();
-    }
-}
-class Item {
-    constructor(id, name, price){
-        this.id = id;
-        this.name = name;
-        this.price = price;
-        this.show = true;
     }
 }
 
@@ -41,7 +65,7 @@ let carnival = {
     },
     showCatalogue(){
         console.log("Here's the list of gifts:\n")
-        this.catalogue.forEach((item) => item.show ? (console.log(`${item.id}- ${item.name}, Cost: ${item.price} tickets`)) : null);
+        this.catalogue.forEach((item) => console.log(`${item.id}- ${item.name}, Cost: ${item.price} tickets`));
         console.log();
     },
     addItem(id=0, name, price){
@@ -49,9 +73,9 @@ let carnival = {
         this.catalogue.push(item);
     },
     removeItem(id){
-        this.catalogue[--id].show = false;
+        let toRemove = this.catalogue.findIndex((item) => item.id === id);
+        this.catalogue.splice(toRemove, 1);
     }
-
 }
 
 //init catalogue. given data is in arrays, because i'm lazy to refactor it :)
@@ -74,6 +98,7 @@ function showActions(actions){
     actions.forEach((item, index) => data += String(index + 1) + '-' + item + (index === actions.length - 1 ? '' : ' '));
     return data;
 }
+
 let isActive = true;
 
 while (isActive) {
@@ -95,7 +120,7 @@ while (isActive) {
             isActive = false;
             break;
         default:
-            console.log('Yet unknown command');
+            console.log('Please enter a valid number!');
             break;
     }
 }
